@@ -1,5 +1,13 @@
+__pycache__/
+*.py[cod]
+*$py.class
 .streamlit/secrets.toml
-components/__pycache__
-services/__pycache__
-views/__pycache__
-utils/__pycache__
+.venv/
+venv/
+env/
+ENV/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

@@ -1,8 +1,32 @@
 import streamlit as st
 from utils.session import init_session_state, refresh_data
+import time
 
 # 1. Configuração da Página (Obrigatório ser a primeira linha executável do Streamlit)
 st.set_page_config(page_title="Farmácia das Irmãs", page_icon="🌿", layout="wide")
+
+# Função de autenticação
+def check_password():
+    if 'logged_in' not in st.session_state:
+        st.session_state['logged_in'] = False
+
+    if not st.session_state['logged_in']:
+        st.title("🔐 Acesso Restrito - Farmácia das Irmãs")
+        senha = st.text_input("Digite a senha de acesso", type="password")
+        
+        if st.button("Entrar"):
+            if senha == st.secrets['APP_PASSWORD']:
+                st.session_state['logged_in'] = True
+                st.success("Login realizado!")
+                time.sleep(0.5)
+                st.rerun()
+            else:
+                st.error("Senha incorreta.")
+        return False
+    return True
+
+if not check_password():
+    st.stop()
 
 # 2. Inicializa Serviços e Estado (Banco de Dados)
 # Isso garante que a conexão com o Supabase exista antes de qualquer coisa
