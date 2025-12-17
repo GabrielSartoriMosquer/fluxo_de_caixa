@@ -19,7 +19,7 @@ def render_view():
     duracao_dict = df_serv.set_index('id')['duracao_estimada'].to_dict() if not df_serv.empty else {}
     prof_dict = df_prof.set_index('id')['nome'].to_dict() if not df_prof.empty else {}
     
-    # --- 1. FILTROS (Devem vir antes da busca no banco) ---
+    # --- 1. FILTROS ---
     c_filtro1, c_filtro2 = st.columns(2)
     dt_sel = c_filtro1.date_input("Filtrar Data", datetime.now())
     
@@ -29,7 +29,7 @@ def render_view():
     else:
         c_filtro2.warning("Cadastre profissionais na aba Cadastros.")
 
-    # --- 2. BUSCA AGENDAMENTOS (Só se tiver profissional selecionado) ---
+    # --- 2. BUSCA AGENDAMENTOS ---
     agendamentos_dia = []
     if prof_id:
         try:
@@ -47,7 +47,6 @@ def render_view():
     start_time = time(8, 0) # Início do expediente
     end_time = time(19, 0)  # Fim do expediente
     
-    # Cria datas completas para comparação
     current = datetime.combine(dt_sel, start_time)
     end_dt = datetime.combine(dt_sel, end_time)
         
@@ -62,16 +61,14 @@ def render_view():
             
         for ag in agendamentos_dia:
             try:
-                # Converte horário do banco (ex: "09:00:00")
                 ag_h_str = ag['horario']
                 ag_time = datetime.strptime(ag_h_str, '%H:%M:%S').time()
                 ag_start = datetime.combine(dt_sel, ag_time)
                 
-                # Pega duração (padrão 30 min se não tiver)
                 dur = ag['servicos']['duracao_estimada'] if ag.get('servicos') else 30
                 ag_end = ag_start + timedelta(minutes=dur)
                 
-                # Checa colisão de horário
+                # Checagem de colisão de horário
                 if slot_start < ag_end and slot_end > ag_start:
                     status = "Ocupado"
                     cliente_info = ag['clientes']['nome'] if ag.get('clientes') else "?"
@@ -108,14 +105,14 @@ def render_view():
         with st.form("novo_agend"):
             c1, c2 = st.columns(2)
             
-            # Select de Cliente com validação
+            # Select de Cliente
             if cli_dict:
                 cli_id = c1.selectbox("Cliente", list(cli_dict.keys()), format_func=lambda x: cli_dict[x])
             else:
                 c1.warning("Sem clientes.")
                 cli_id = None
                 
-            # Select de Serviço com validação
+            # Select de Serviço
             if serv_dict:
                 srv_id = c2.selectbox("Serviço", list(serv_dict.keys()), format_func=lambda x: serv_dict[x])
             else:
@@ -127,21 +124,18 @@ def render_view():
             if st.form_submit_button("✅ Confirmar Agendamento"):
                 if cli_id and srv_id and prof_id:
                     try:
-                        # Cálcula horário de término do NOVO agendamento
                         new_start = datetime.combine(dt_sel, hr_input)
                         duracao_nova = duracao_dict.get(srv_id, 30)
                         new_end = new_start + timedelta(minutes=duracao_nova)
                         
                         conflito = False
                         
-                        # Verifica colisão com CADA agendamento existente
                         for ag in agendamentos_dia:
                             ag_time = datetime.strptime(ag['horario'], '%H:%M:%S').time()
                             ag_start = datetime.combine(dt_sel, ag_time)
                             dur = ag['servicos']['duracao_estimada'] if ag.get('servicos') else 30
                             ag_end = ag_start + timedelta(minutes=dur)
                             
-                            # Lógica de interseção: (InicioA < FimB) e (FimA > InicioB)
                             if new_start < ag_end and new_end > ag_start:
                                 conflito = True
                                 break
@@ -149,7 +143,6 @@ def render_view():
                         if conflito:
                             st.error("❌ Conflito! Já existe um agendamento neste horário.")
                         else:
-                            # Insere no banco
                             db.insert('agendamentos', {
                                 'id_cliente': cli_id, 
                                 'id_servico': srv_id, 

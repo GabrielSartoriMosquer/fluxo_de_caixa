@@ -6,10 +6,9 @@ def render_view():
     st.write("Registre aqui a chegada de novos produtos.")
 
     db = st.session_state['db_service']
-    df_p = st.session_state['produtos'] # Carrega os produtos
-    
-    # --- CORREÇÃO: Declaração dos Inputs ---
-    with st.form("nova_compra"): # Encapsulei num form para ficar organizado
+    df_p = st.session_state['produtos'] 
+
+    with st.form("nova_compra"):
         
         c_date_compra = st.date_input("Data da Compra", datetime.now()) 
         
@@ -25,7 +24,6 @@ def render_view():
         qtd = c1.number_input("Quantidade que chegou", 1, 1000, 1)
             
         custo_unitario = 0.0
-        # Lógica para sugerir custo (metade do valor de venda)
         if prod_id and not df_p.empty:
             try: 
                 val_orig = df_p.loc[df_p['id']==prod_id, 'valor_original'].values[0]
@@ -45,14 +43,13 @@ def render_view():
                     # 1. Registrar a Compra
                     db.insert('compras', {
                         'id_produto': int(prod_id), 
-                        'quantidade': int(qtd), # Garante inteiro
+                        'quantidade': int(qtd), 
                         'valor_total': custo,
                         'fornecedor': fornecedor,
                         'data_compra': str(c_date_compra)
                     })
                         
-                    # 2. Atualizar Estoque (+ Qtd)
-                    # Nota: Idealmente isso seria uma trigger no banco ou transaction, mas via codigo:
+                    # 2. Atualizar Estoque 
                     res_p = db.client.table('produtos').select('estoque').eq('id', prod_id).execute()
                     est_atual = res_p.data[0]['estoque'] if res_p.data else 0
                     novo_estoque = int(est_atual) + int(qtd)

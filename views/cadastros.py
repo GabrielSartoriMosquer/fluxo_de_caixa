@@ -3,17 +3,15 @@ from components.crud import render_generic_crud
 import re
 
 def validate_cpf(cpf):
-    # Remove caracteres não numéricos
     cpf_clean = re.sub(r'\D', '', str(cpf))
     if len(cpf_clean) != 11:
-        return False, "CPF deve ter 11 dígitos."
-    # Aqui poderia entrar validação de dígito verificador, mas vamos manter simples por enquanto
+        return False, "CPF deve ter 11 números."
     return True, ""
 
 def validate_phone(phone):
     phone_clean = re.sub(r'\D', '', str(phone))
     if len(phone_clean) < 10 or len(phone_clean) > 11:
-        return False, "Telefone deve ter 10 ou 11 dígitos (com DDD)."
+        return False, "Telefone deve ter 10 ou 11 números (com DDD)."
     return True, ""
 
 def render_view():

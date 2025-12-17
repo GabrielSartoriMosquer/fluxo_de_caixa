@@ -35,10 +35,8 @@ def render_generic_crud(table_name: str, title: str, fields: list, df_current: p
                         payload[f['name']] = st.checkbox(f['label'], value=True)
                 
                 if st.form_submit_button("Salvar"):
-                    # Validação de Campos Obrigatórios
                     missing = [f['label'] for f in fields if f.get('required') and not payload[f['name']]]
                     
-                    # Validação Customizada (se houver função validadora)
                     custom_error = None
                     for f in fields:
                         if 'validator' in f and payload[f['name']]:
@@ -55,10 +53,8 @@ def render_generic_crud(table_name: str, title: str, fields: list, df_current: p
                         try:
                             clean_payload = {}
                             for k, v in payload.items():
-                                # Verifica se o campo existe na lista de fields
                                 field_config = next((f for f in fields if f['name'] == k), None)
                                 if field_config:
-                                    # Se for estoque ou quantidade, força conversão para int
                                     if k in ['estoque', 'quantidade', 'duracao_estimada']:
                                         clean_payload[k] = int(v)
                                     else:
@@ -104,8 +100,7 @@ def render_generic_crud(table_name: str, title: str, fields: list, df_current: p
                         except Exception as e:
                             st.error(f"Erro: {e}")
 
-                    # Botão de Deletar com Confirmação (Simulação via Session State ou Checkbox)
-                    # Streamlit forms não suportam botões aninhados facilmente, então usamos um checkbox de confirmação
+                    # Botão de Deletar com Confirmação
                     confirm_del = st.checkbox("⚠️ Tenho certeza que quero apagar este item")
                     if col_del.form_submit_button("🗑️ Apagar", type="primary"):
                         if confirm_del:

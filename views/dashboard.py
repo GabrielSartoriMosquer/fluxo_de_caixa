@@ -141,7 +141,6 @@ def render_view():
     if not df_trans.empty:
         df_display = df_trans.copy()
         
-        # Merge simples para pegar nome do cliente
         if not df_cli.empty:
             df_display['id_cliente'] = df_display['id_cliente'].fillna(0).astype(int)
             df_cli['id'] = df_cli['id'].astype(int)
@@ -150,11 +149,9 @@ def render_view():
         else:
             df_display['Cliente'] = "Consumidor Final"
 
-        # Seleciona colunas finais
         df_final = df_display[['data_transacao', 'Cliente', 'valor_total', 'pagamento', 'origem']].copy()
         df_final = df_final.sort_values('data_transacao', ascending=False)
         
-        # Configuração visual avançada da tabela
         st.dataframe(
             df_final,
             column_config={
@@ -169,7 +166,7 @@ def render_view():
                 "pagamento": st.column_config.TextColumn(
                     "Pagamento",
                     help="Método utilizado",
-                    validate="^(Pix|Dinheiro|Cartão|Boleto)$" # Validação visual opcional
+                    validate="^(Pix|Dinheiro|Cartão|Boleto)$" 
                 ),
                 "origem": st.column_config.SelectboxColumn(
                     "Origem",

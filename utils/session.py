@@ -5,7 +5,6 @@ from services.database import DatabaseService
 def init_session_state():
     """Inicializa as variáveis de estado e carrega dados se necessário."""
     
-    # Estrutura padrão para evitar DataFrames undefined
     tabelas_padrao = {
         'transacoes': pd.DataFrame(columns=['id', 'created_at', 'data_transacao', 'pagamento', 'origem', 'valor_total', 'id_cliente']),
         'clientes': pd.DataFrame(columns=['id', 'nome', 'cpf', 'telefone']),
@@ -33,7 +32,6 @@ def refresh_data():
         novos_dados = db.fetch_all_tables()
         if novos_dados:
             for k, v in novos_dados.items():
-                # Atualiza sempre, mesmo que vazio, para refletir deleções
                 if isinstance(v, pd.DataFrame):
                     st.session_state[k] = v
         st.session_state['refresh'] = False

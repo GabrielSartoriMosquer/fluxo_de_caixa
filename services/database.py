@@ -32,9 +32,8 @@ class DatabaseService:
                 dados[tabela] = pd.DataFrame(res.data)
             except Exception as e:
                 print(f"Erro ao buscar {tabela}: {e}")
-                dados[tabela] = pd.DataFrame() # Retorna vazio em caso de erro
+                dados[tabela] = pd.DataFrame() 
 
-        # Agendamentos (com Join)
         try:
             res_ag = self.client.table('agendamentos').select("*, clientes(nome), servicos(nome), atendentes(nome)").order('data_agendamento', desc=True).execute()
             dados_flat = []
